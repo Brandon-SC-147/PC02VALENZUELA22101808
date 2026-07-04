@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 data class AuthUiState(
     val isLoading: Boolean = false,
     val user: FirebaseUser? = null,
+    val userName: String = "",
     val error: String? = null,
     val isLoggedIn: Boolean = false
 )
@@ -27,10 +28,25 @@ class AuthViewModel : ViewModel() {
 
     private fun checkAuthState() {
         val user = repository.getCurrentUser()
+        if (user != null) {
+            loadUserName(user.uid)
+        }
         _uiState.value = AuthUiState(
             user = user,
             isLoggedIn = user != null
         )
+    }
+
+    private fun loadUserName(uid: String) {
+        viewModelScope.launch {
+            val result = repository.getUserProfile(uid)
+            result.fold(
+                onSuccess = { appUser ->
+                    _uiState.value = _uiState.value.copy(userName = appUser.name)
+                },
+                onFailure = { }
+            )
+        }
     }
 
     fun login(email: String, password: String) {
@@ -44,6 +60,7 @@ class AuthViewModel : ViewModel() {
             result.fold(
                 onSuccess = { user ->
                     _uiState.value = AuthUiState(user = user, isLoggedIn = true)
+                    loadUserName(user.uid)
                 },
                 onFailure = { e ->
                     _uiState.value = _uiState.value.copy(
@@ -55,17 +72,21 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun register(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
+    fun register(name: String, email: String, password: String) {
+        if (name.isBlank() || email.isBlank() || password.isBlank()) {
             _uiState.value = _uiState.value.copy(error = "Complete todos los campos")
             return
         }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            val result = repository.register(email.trim(), password)
+            val result = repository.register(name.trim(), email.trim(), password)
             result.fold(
                 onSuccess = { user ->
-                    _uiState.value = AuthUiState(user = user, isLoggedIn = true)
+                    _uiState.value = AuthUiState(
+                        user = user,
+                        userName = name.trim(),
+                        isLoggedIn = true
+                    )
                 },
                 onFailure = { e ->
                     _uiState.value = _uiState.value.copy(

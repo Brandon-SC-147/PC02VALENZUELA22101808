@@ -43,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrencyConverterScreen(
+    userName: String,
     onNavigateToHistory: () -> Unit,
     onLogout: () -> Unit,
     viewModel: CurrencyConverterViewModel = viewModel()
@@ -51,7 +52,18 @@ fun CurrencyConverterScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("Conversor de Monedas") },
+            title = {
+                Column {
+                    Text("Conversor de Monedas")
+                    if (userName.isNotBlank()) {
+                        Text(
+                            text = "Bienvenido, $userName",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
             actions = {
                 IconButton(onClick = onNavigateToHistory) {
                     Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Historial")

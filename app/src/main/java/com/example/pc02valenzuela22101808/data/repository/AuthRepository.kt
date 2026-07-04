@@ -1,37 +1,28 @@
 package com.example.pc02valenzuela22101808.data.repository
 
-import com.google.firebase.auth.FirebaseAuth
+import com.example.pc02valenzuela22101808.data.model.AppUser
 import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
-    private val auth = FirebaseAuth.getInstance()
+    private val authManager = FirebaseAuthManager()
 
-    fun getCurrentUser(): FirebaseUser? = auth.currentUser
+    fun getCurrentUser(): FirebaseUser? = authManager.getCurrentUser()
 
-    fun isUserLoggedIn(): Boolean = auth.currentUser != null
+    fun isUserLoggedIn(): Boolean = authManager.isUserLoggedIn()
 
     suspend fun login(email: String, password: String): Result<FirebaseUser> {
-        return try {
-            val result = auth.signInWithEmailAndPassword(email, password).await()
-            result.user?.let { Result.success(it) }
-                ?: Result.failure(Exception("Error al iniciar sesión"))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return authManager.login(email, password)
     }
 
-    suspend fun register(email: String, password: String): Result<FirebaseUser> {
-        return try {
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
-            result.user?.let { Result.success(it) }
-                ?: Result.failure(Exception("Error al registrarse"))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun register(name: String, email: String, password: String): Result<FirebaseUser> {
+        return authManager.register(name, email, password)
+    }
+
+    suspend fun getUserProfile(uid: String): Result<AppUser> {
+        return authManager.getUserProfile(uid)
     }
 
     fun logout() {
-        auth.signOut()
+        authManager.logout()
     }
 }

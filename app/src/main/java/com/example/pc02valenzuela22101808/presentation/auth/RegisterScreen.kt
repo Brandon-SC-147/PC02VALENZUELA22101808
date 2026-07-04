@@ -35,6 +35,7 @@ fun RegisterScreen(
     viewModel: AuthViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -61,6 +62,16 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nombre completo") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Correo electrónico") },
@@ -69,7 +80,7 @@ fun RegisterScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = password,
@@ -84,7 +95,7 @@ fun RegisterScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = confirmPassword,
@@ -116,7 +127,7 @@ fun RegisterScreen(
                 if (password != confirmPassword) {
                     passwordError = "Las contraseñas no coinciden"
                 } else {
-                    viewModel.register(email, password)
+                    viewModel.register(name, email, password)
                 }
             },
             modifier = Modifier.fillMaxWidth(),

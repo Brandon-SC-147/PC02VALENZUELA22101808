@@ -5,7 +5,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.pc02valenzuela22101808.data.repository.AuthRepository
 import com.example.pc02valenzuela22101808.presentation.auth.AuthViewModel
 import com.example.pc02valenzuela22101808.presentation.auth.LoginScreen
 import com.example.pc02valenzuela22101808.presentation.auth.RegisterScreen
@@ -59,6 +58,7 @@ fun AppNavGraph(
 
         composable(Routes.CONVERTER) {
             CurrencyConverterScreen(
+                userName = authViewModel.uiState.value.userName,
                 onNavigateToHistory = {
                     navController.navigate(Routes.HISTORY)
                 },
