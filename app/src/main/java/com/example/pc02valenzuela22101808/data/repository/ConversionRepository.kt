@@ -21,14 +21,17 @@ class ConversionRepository {
 
     suspend fun getConversionsByUser(uid: String): Result<List<Conversion>> {
         return try {
+            // Se filtra por UID para cumplir con las reglas de seguridad de Firestore
             val snapshot = conversionsRef
                 .whereEqualTo("uid", uid)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .await()
+            
+            // Se ordena en memoria para evitar errores de índices inexistentes
             val conversions = snapshot.documents.map { doc ->
                 Conversion.fromMap(doc.data ?: emptyMap())
-            }
+            }.sortedByDescending { it.createdAt?.seconds ?: 0L }
+
             Result.success(conversions)
         } catch (e: Exception) {
             Result.failure(e)

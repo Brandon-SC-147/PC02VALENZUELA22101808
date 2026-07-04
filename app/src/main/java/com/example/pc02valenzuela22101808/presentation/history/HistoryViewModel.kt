@@ -3,8 +3,8 @@ package com.example.pc02valenzuela22101808.presentation.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pc02valenzuela22101808.data.model.Conversion
-import com.example.pc02valenzuela22101808.data.repository.AuthRepository
 import com.example.pc02valenzuela22101808.data.repository.ConversionRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +17,6 @@ data class HistoryUiState(
 
 class HistoryViewModel : ViewModel() {
     private val conversionRepository = ConversionRepository()
-    private val authRepository = AuthRepository()
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState
@@ -27,14 +26,15 @@ class HistoryViewModel : ViewModel() {
     }
 
     fun loadHistory() {
-        val user = authRepository.getCurrentUser() ?: run {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
             _uiState.value = HistoryUiState(error = "Usuario no autenticado")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            val result = conversionRepository.getConversionsByUser(user.uid)
+            val result = conversionRepository.getConversionsByUser(currentUser.uid)
             result.fold(
                 onSuccess = { conversions ->
                     _uiState.value = HistoryUiState(conversions = conversions)
